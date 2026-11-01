@@ -1,18 +1,14 @@
-const STORAGE_KEY = "studyboard-kanban-tasks-v1";
+const STORAGE_KEY = "study-planner-minimal-v1";
 const form = document.querySelector("#task-form");
 const titleInput = document.querySelector("#task-title");
 const courseInput = document.querySelector("#task-course");
-const openList = document.querySelector("#open-list");
-const doneList = document.querySelector("#done-list");
-const openEmpty = document.querySelector("#open-empty");
-const doneEmpty = document.querySelector("#done-empty");
+const taskList = document.querySelector("#task-list");
+const emptyState = document.querySelector("#empty-state");
+const emptyTitle = document.querySelector("#empty-title");
+const emptyCopy = document.querySelector("#empty-copy");
 const formError = document.querySelector("#form-error");
-const openCount = document.querySelector("#open-count");
-const doneCount = document.querySelector("#done-count");
-const openLaneCount = document.querySelector("#open-lane-count");
-const doneLaneCount = document.querySelector("#done-lane-count");
+const remainingCount = document.querySelector("#remaining-count");
 const allCount = document.querySelector("#all-count");
-const footerTotal = document.querySelector("#footer-total");
 const clearCompletedButton = document.querySelector("#clear-completed");
 const filterButtons = [...document.querySelectorAll(".filter-button")];
 
@@ -40,9 +36,28 @@ function saveTasks() {
   }
 }
 
-function makeTaskCard(task) {
-  const card = document.createElement("li");
-  card.className = "task-card";
+function getVisibleTasks() {
+  if (activeFilter === "active") return tasks.filter((task) => !task.completed);
+  if (activeFilter === "completed") return tasks.filter((task) => task.completed);
+  return tasks;
+}
+
+function makeTaskRow(task) {
+  const row = document.createElement("li");
+  row.className = `task-row${task.completed ? " is-complete" : ""}`;
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "task-toggle";
+  toggle.textContent = "✓";
+  toggle.setAttribute("aria-label", `${task.completed ? "Mark incomplete" : "Mark complete"}: ${task.title}`);
+  toggle.setAttribute("aria-pressed", String(task.completed));
+  toggle.addEventListener("click", () => {
+    task.completed = !task.completed;
+    saveTasks();
+    render();
+  });
+
   const copy = document.createElement("div");
   copy.className = "task-copy";
   const title = document.createElement("p");
@@ -56,51 +71,37 @@ function makeTaskCard(task) {
     copy.append(course);
   }
 
-  const actions = document.createElement("div");
-  actions.className = "task-actions";
-  const toggle = document.createElement("button");
-  toggle.type = "button";
-  toggle.className = "task-toggle";
-  toggle.textContent = task.completed ? "↶" : "✓";
-  toggle.setAttribute("aria-label", `${task.completed ? "Move to in progress" : "Mark done"}: ${task.title}`);
-  toggle.setAttribute("aria-pressed", String(task.completed));
-  toggle.addEventListener("click", () => {
-    task.completed = !task.completed;
-    saveTasks();
-    render();
-  });
-
   const remove = document.createElement("button");
   remove.type = "button";
   remove.className = "remove-button";
-  remove.textContent = "×";
+  remove.textContent = "Remove";
   remove.setAttribute("aria-label", `Remove ${task.title}`);
   remove.addEventListener("click", () => {
     tasks = tasks.filter((item) => item.id !== task.id);
     saveTasks();
     render();
   });
-  actions.append(toggle, remove);
-  card.append(copy, actions);
-  return card;
+
+  row.append(toggle, copy, remove);
+  return row;
 }
 
 function render() {
-  const showOpen = activeFilter !== "completed";
-  const showDone = activeFilter !== "active";
-  const openTasks = tasks.filter((task) => !task.completed);
-  const doneTasks = tasks.filter((task) => task.completed);
-  openList.replaceChildren(...(showOpen ? openTasks : []).map(makeTaskCard));
-  doneList.replaceChildren(...(showDone ? doneTasks : []).map(makeTaskCard));
-  openEmpty.hidden = !showOpen || openTasks.length > 0;
-  doneEmpty.hidden = !showDone || doneTasks.length > 0;
-  openCount.textContent = String(openTasks.length);
-  doneCount.textContent = String(doneTasks.length);
-  openLaneCount.textContent = String(openTasks.length);
-  doneLaneCount.textContent = String(doneTasks.length);
+  const shown = getVisibleTasks();
+  taskList.replaceChildren(...shown.map(makeTaskRow));
+  const remaining = tasks.filter((task) => !task.completed).length;
+  remainingCount.textContent = String(remaining);
   allCount.textContent = String(tasks.length);
-  footerTotal.textContent = `${tasks.length} ${tasks.length === 1 ? "TASK" : "TASKS"}`;
-  clearCompletedButton.hidden = doneTasks.length === 0;
+  clearCompletedButton.hidden = !tasks.some((task) => task.completed);
+  emptyState.hidden = shown.length > 0;
+
+  if (tasks.length === 0) {
+    emptyTitle.textContent = "Nothing here yet";
+    emptyCopy.textContent = "Add a task to get started.";
+  } else if (shown.length === 0) {
+    emptyTitle.textContent = activeFilter === "active" ? "All caught up" : "No completed tasks";
+    emptyCopy.textContent = activeFilter === "active" ? "Everything on your list is done." : "Completed tasks will appear here.";
+  }
 }
 
 function updateFilters() {
@@ -158,9 +159,9 @@ clearCompletedButton.addEventListener("click", () => {
   render();
 });
 
-const now = new Date();
+const today = new Date();
 document.querySelector("#today-label").textContent = new Intl.DateTimeFormat(undefined, {
-  weekday: "short", month: "long", day: "numeric",
-}).format(now).toUpperCase();
+  weekday: "long", month: "long", day: "numeric",
+}).format(today).toUpperCase();
 
 render();
