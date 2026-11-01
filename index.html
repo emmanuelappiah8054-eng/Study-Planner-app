@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5f0">
+  <meta name="description" content="A simple kanban study planner.">
+  <title>Study Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="board-app">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Study Board home"><span class="brand-logo" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span>STUDYBOARD</span></a>
+      <div class="save-state"><span class="save-dot"></span> Saved on this device</div>
+    </header>
+
+    <section class="board-intro" aria-label="Study board summary">
+      <div>
+        <p class="date-kicker" id="today-label">YOUR STUDY SPACE</p>
+        <h1>Study board</h1>
+      </div>
+      <div class="task-summary"><strong id="open-count">0</strong><span>IN PROGRESS</span><i></i><strong id="done-count">0</strong><span>DONE</span></div>
+    </section>
+
+    <form class="task-form" id="task-form" novalidate>
+      <span class="form-plus" aria-hidden="true">+</span>
+      <label class="visually-hidden" for="task-title">Task name</label>
+      <input id="task-title" name="title" type="text" maxlength="120" placeholder="What are you working on?" autocomplete="off" required>
+      <label class="visually-hidden" for="task-course">Subject or course (optional)</label>
+      <input id="task-course" name="course" type="text" maxlength="60" placeholder="Subject or course" autocomplete="off">
+      <button type="submit" class="add-button">Add to board <span aria-hidden="true">↗</span></button>
+      <p class="form-error" id="form-error" role="alert" hidden>Enter a task name first.</p>
+    </form>
+
+    <div class="board-toolbar">
+      <div class="filter-group" role="group" aria-label="Show tasks">
+        <button type="button" class="filter-button is-active" data-filter="all" aria-pressed="true">Board <span id="all-count">0</span></button>
+        <button type="button" class="filter-button" data-filter="active" aria-pressed="false">In progress</button>
+        <button type="button" class="filter-button" data-filter="completed" aria-pressed="false">Done</button>
+      </div>
+      <button type="button" class="clear-button" id="clear-completed" hidden>Clear done tasks</button>
+    </div>
+
+    <section class="kanban" aria-label="Study tasks board">
+      <section class="lane lane-open" aria-labelledby="open-title">
+        <header class="lane-header"><div class="lane-title"><span class="lane-marker" aria-hidden="true"></span><h2 id="open-title">In progress</h2><span class="lane-count" id="open-lane-count">0</span></div><span class="lane-note">CURRENT FOCUS</span></header>
+        <ul class="task-list" id="open-list" aria-label="Tasks in progress"></ul>
+        <p class="lane-empty" id="open-empty">No open tasks. Add one above.</p>
+      </section>
+      <section class="lane lane-done" aria-labelledby="done-title">
+        <header class="lane-header"><div class="lane-title"><span class="lane-marker" aria-hidden="true"></span><h2 id="done-title">Done</h2><span class="lane-count" id="done-lane-count">0</span></div><span class="lane-note">NICE WORK</span></header>
+        <ul class="task-list" id="done-list" aria-label="Completed tasks"></ul>
+        <p class="lane-empty" id="done-empty">Finished tasks will land here.</p>
+      </section>
+    </section>
+
+    <footer class="board-footer"><span>ONE STEP, THEN THE NEXT.</span><span id="footer-total">0 TASKS</span></footer>
+  </main>
+</body>
+</html>
